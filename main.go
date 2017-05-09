@@ -45,12 +45,15 @@ func main() {
 		fmt.Println("Usage: netmsg-go <username>")
 		return
 	}
+	const port = 34512
 	ip, err := getClientIPV4()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(ip.String())
-	go ListenOnUDP(ip, 34512, os.Args[1])
+	//fmt.Println(ip.String())
+	go ListenOnUDP(ip, port, os.Args[1])
+	go ListenOnTCP(ip, port)
+	fmt.Println("Listening for messages")
 	for {}
 }
