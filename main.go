@@ -15,7 +15,7 @@ func (e *GetIPError) Error() string {
 	return fmt.Sprint(e.msg)
 }
 
-func getClientIPV4() (ip net.IP, err error) {
+func getClientIPNet() (ip *net.IPNet, err error) {
 	ifaces, err := net.Interfaces()
 	if err != nil {
 		return ip, err
@@ -27,11 +27,11 @@ func getClientIPV4() (ip net.IP, err error) {
 				return ip, err
 			}
 			for _, j := range addrs {
-				addr, ok := j.(*net.IPNet)
+				ip, ok := j.(*net.IPNet)
 				if !ok {
 					return ip, &GetIPError{"addr in interface address list is not type *IPNet please report to developer"}
 				}
-				if ip = addr.IP.To4(); ip != nil {
+				if ip.IP.To4()!= nil {
 					return ip, nil
 				}
 			}
@@ -46,14 +46,15 @@ func main() {
 		return
 	}
 	const port = 34512
-	ip, err := getClientIPV4()
+	ip, err := getClientIPNet()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	//fmt.Println(ip.String())
-	go ListenOnUDP(ip, port, os.Args[1])
-	go ListenOnTCP(ip, port)
+	go ListenOnUDP(ip.IP.To4(), port, os.Args[1])
+	go ListenOnTCP(ip.IP.To4(), port)
 	fmt.Println("Listening for messages")
+	Broadcast(ip, port, "doug") // for testing - broadcast will belong in main loop
 	for {}
 }
