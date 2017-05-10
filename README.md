@@ -1,4 +1,4 @@
-#netmsg-go
+# netmsg-go
 
 An implementation of [netmsg](https://github.com/DougWagner/netmsg) written in the Go programming language. Communication back and forth between versions is possible.
 
