@@ -24,7 +24,7 @@ func ListenOnUDP(addr net.IP, port int, name string) {
 			return
 		}
 		uname := string(buffer[:read])
-		fmt.Println(uname, returnIP)
+		//fmt.Println(uname, returnIP)
 		if uname == name {
 			_, err := conn.WriteToUDP(addr, returnIP)
 			if err != nil {
@@ -35,10 +35,10 @@ func ListenOnUDP(addr net.IP, port int, name string) {
 	}
 }
 
-func Uint32(b []byte) (n uint32) {
-	n += uint32(b[3] << 24)
-	n += uint32(b[2] << 16)
-	n += uint32(b[1] << 8)
+func ToUint32(b []byte) (n uint32) {
+	n += uint32(b[3]) << 24
+	n += uint32(b[2]) << 16
+	n += uint32(b[1]) << 8
 	n += uint32(b[0])
 	return
 }
@@ -66,7 +66,7 @@ func ListenOnTCP(addr net.IP, port int) {
 			fmt.Println(err)
 			return
 		}
-		size := Uint32(sizebuf)
+		size := ToUint32(sizebuf)
 		msgbuf := make([]byte, size)
 		_, err = conn.Read(msgbuf)
 		if err != nil {

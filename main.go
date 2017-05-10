@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"net"
 	"os"
@@ -51,10 +52,40 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	//fmt.Println(ip.String())
+	fmt.Println("send command syntax: \"send username message contents\"")
+	fmt.Println("you do not need to put quotes around your message")
+	fmt.Println("type \"exit\" to quit")
 	go ListenOnUDP(ip.IP.To4(), port, os.Args[1])
 	go ListenOnTCP(ip.IP.To4(), port)
 	fmt.Println("Listening for messages")
-	Broadcast(ip, port, "doug") // for testing - broadcast will belong in main loop
-	for {}
+	for {
+		in := bufio.NewReader(os.Stdin)
+		input, err := in.ReadString('\n')
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		input = strings.TrimSuffix(input, "\n")
+		splitinput := strings.Split(input, " ")
+		if strings.ToLower(splitinput[0]) == "send" {
+			if len(splitinput) < 3 {
+				fmt.Println("Invalid send command")
+				continue
+			}
+			message := strings.Trim(strings.Join(splitinput[2:], " "), " ")
+			targetIP, err := Broadcast(ip, port, splitinput[1])
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			err = SendMessage(ip.IP.To4(), *targetIP, port, fmt.Sprintf("%v: %v", os.Args[1], message))
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else if strings.ToLower(splitinput[0]) == "exit" {
+			return
+		} else {
+			fmt.Println("Invalid Command")
+		}
+	}
 }

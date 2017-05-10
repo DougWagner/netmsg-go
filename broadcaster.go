@@ -6,8 +6,15 @@ import (
 	"time"
 )
 
+type NoResponseError struct {
+	msg string
+}
 
-func Broadcast(ip *net.IPNet, port int, uname string) {
+func (e *NoResponseError) Error() string {
+	return fmt.Sprint(e.msg)
+}
+
+func Broadcast(ip *net.IPNet, port int, uname string) (*net.IP, error) {
 	broadcastBytes := make([]byte, 4)
 	for i, m := range ip.Mask {
 		broadcastBytes[i] = ip.IP.To4()[i] | (m ^ 255)
@@ -15,18 +22,15 @@ func Broadcast(ip *net.IPNet, port int, uname string) {
 	broadcastIP := net.IP(broadcastBytes)
 	bcastUDPAddr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%v:%v", broadcastIP.To4(), port))
 	if err != nil {
-		fmt.Println(err)
-		return
+		return nil, err
 	}
 	lUDPAddr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%v:", ip.IP.To4()))
 	if err != nil {
-		fmt.Println(err)
-		return
+		return nil, err
 	}
 	conn, err := net.ListenUDP("udp", lUDPAddr)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return nil, err
 	}
 	unameBytes := []byte(uname)
 	response := make([]byte, 4)
@@ -34,10 +38,10 @@ func Broadcast(ip *net.IPNet, port int, uname string) {
 	conn.SetReadDeadline(time.Now().Add(time.Duration(1) * time.Second))
 	_, _, err = conn.ReadFromUDP(response)
 	if err != nil {
-		fmt.Println(err)
 		conn.Close()
-		return
+		return nil, &NoResponseError{"No response received"}
 	}
 	conn.Close()
-	fmt.Println(response)
+	returnIP := net.IP(response)
+	return &returnIP, nil
 }
