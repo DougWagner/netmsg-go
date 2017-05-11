@@ -5,7 +5,7 @@ import (
 	"net"
 )
 
-func Uint32ToB(n uint32) (b []byte) {
+func uint32ToB(n uint32) (b []byte) {
 	b = make([]byte, 4)
 	b[0] = byte(n & 255)
 	b[1] = byte((n >> 8) & 255)
@@ -14,7 +14,7 @@ func Uint32ToB(n uint32) (b []byte) {
 	return
 }
 
-func SendMessage(localIP, targetIP net.IP, port int, msg string) error {
+func sendMessage(localIP, targetIP net.IP, port int, msg string) error {
 	localAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%v:", localIP))
 	if err != nil {
 		return err
@@ -28,7 +28,7 @@ func SendMessage(localIP, targetIP net.IP, port int, msg string) error {
 		return err
 	}
 	msgBytes := []byte(msg)
-	sizeBytes := Uint32ToB(uint32(len(msgBytes)))
+	sizeBytes := uint32ToB(uint32(len(msgBytes)))
 	var buffer []byte
 	buffer = append(buffer, sizeBytes...)
 	buffer = append(buffer, msgBytes...)

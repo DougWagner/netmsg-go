@@ -6,15 +6,15 @@ import (
 	"time"
 )
 
-type NoResponseError struct {
+type noResponseError struct {
 	msg string
 }
 
-func (e *NoResponseError) Error() string {
+func (e *noResponseError) Error() string {
 	return fmt.Sprint(e.msg)
 }
 
-func Broadcast(ip *net.IPNet, port int, uname string) (*net.IP, error) {
+func broadcast(ip *net.IPNet, port int, uname string) (*net.IP, error) {
 	broadcastBytes := make([]byte, 4)
 	for i, m := range ip.Mask {
 		broadcastBytes[i] = ip.IP.To4()[i] | (m ^ 255)
@@ -39,7 +39,7 @@ func Broadcast(ip *net.IPNet, port int, uname string) (*net.IP, error) {
 	_, _, err = conn.ReadFromUDP(response)
 	if err != nil {
 		conn.Close()
-		return nil, &NoResponseError{"No response received"}
+		return nil, &noResponseError{"No response received"}
 	}
 	conn.Close()
 	returnIP := net.IP(response)

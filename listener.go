@@ -5,7 +5,7 @@ import (
 	"net"
 )
 
-func ListenOnUDP(addr net.IP, port int, name string) {
+func listenOnUDP(addr net.IP, port int, name string) {
 	udp, err := net.ResolveUDPAddr("udp", fmt.Sprintf("0.0.0.0:%v", port))
 	if err != nil {
 		fmt.Println(err)
@@ -35,7 +35,7 @@ func ListenOnUDP(addr net.IP, port int, name string) {
 	}
 }
 
-func ToUint32(b []byte) (n uint32) {
+func toUint32(b []byte) (n uint32) {
 	n += uint32(b[3]) << 24
 	n += uint32(b[2]) << 16
 	n += uint32(b[1]) << 8
@@ -43,7 +43,7 @@ func ToUint32(b []byte) (n uint32) {
 	return
 }
 
-func ListenOnTCP(addr net.IP, port int) {
+func listenOnTCP(addr net.IP, port int) {
 	tcp, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%v:%v", addr, port))
 	if err != nil {
 		fmt.Println(err)
@@ -66,7 +66,7 @@ func ListenOnTCP(addr net.IP, port int) {
 			fmt.Println(err)
 			return
 		}
-		size := ToUint32(sizebuf)
+		size := toUint32(sizebuf)
 		msgbuf := make([]byte, size)
 		_, err = conn.Read(msgbuf)
 		if err != nil {

@@ -1,3 +1,6 @@
+// netmsg-go is a simple messaging application for local network
+// using TCP and UDP network protocols.
+// Usage: netmsg-go <username>
 package main
 
 import (
@@ -8,11 +11,11 @@ import (
 	"strings"
 )
 
-type GetIPError struct {
+type getIPError struct {
 	msg string
 }
 
-func (e *GetIPError) Error() string {
+func (e *getIPError) Error() string {
 	return fmt.Sprint(e.msg)
 }
 
@@ -30,15 +33,15 @@ func getClientIPNet() (ip *net.IPNet, err error) {
 			for _, j := range addrs {
 				ip, ok := j.(*net.IPNet)
 				if !ok {
-					return ip, &GetIPError{"addr in interface address list is not type *IPNet please report to developer"}
+					return ip, &getIPError{"addr in interface address list is not type *IPNet please report to developer"}
 				}
-				if ip.IP.To4()!= nil {
+				if ip.IP.To4() != nil {
 					return ip, nil
 				}
 			}
 		}
 	}
-	return ip, &GetIPError{"Could not obtain IP Address"}
+	return ip, &getIPError{"Could not obtain IP Address"}
 }
 
 func main() {
@@ -55,8 +58,8 @@ func main() {
 	fmt.Println("send command syntax: \"send username message contents\"")
 	fmt.Println("you do not need to put quotes around your message")
 	fmt.Println("type \"exit\" to quit")
-	go ListenOnUDP(ip.IP.To4(), port, os.Args[1])
-	go ListenOnTCP(ip.IP.To4(), port)
+	go listenOnUDP(ip.IP.To4(), port, os.Args[1])
+	go listenOnTCP(ip.IP.To4(), port)
 	fmt.Println("Listening for messages")
 	for {
 		in := bufio.NewReader(os.Stdin)
@@ -73,12 +76,12 @@ func main() {
 				continue
 			}
 			message := strings.Trim(strings.Join(splitinput[2:], " "), " ")
-			targetIP, err := Broadcast(ip, port, splitinput[1])
+			targetIP, err := broadcast(ip, port, splitinput[1])
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
-			err = SendMessage(ip.IP.To4(), *targetIP, port, fmt.Sprintf("%v: %v", os.Args[1], message))
+			err = sendMessage(ip.IP.To4(), *targetIP, port, fmt.Sprintf("%v: %v", os.Args[1], message))
 			if err != nil {
 				fmt.Println(err)
 			}
