@@ -25,7 +25,7 @@ func getClientIPNet() (ip *net.IPNet, err error) {
 		return ip, err
 	}
 	for _, i := range ifaces {
-		if strings.Contains(i.Flags.String(), "broadcast") {
+		if strings.Contains(i.Flags.String(), "broadcast") && strings.Contains(i.Flags.String(), "up") {
 			addrs, err := i.Addrs()
 			if err != nil {
 				return ip, err
